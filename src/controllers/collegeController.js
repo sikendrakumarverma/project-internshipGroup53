@@ -15,7 +15,7 @@ const createCollege = async function (req, res) {
         if (!validator.isValidShortName(data.name)) {
             return res.status(400).send({ status: false, message: "Name can contain only letters" })
         }
-        let duplicateName = await collegeModel.findOne({ name: data.name})
+        let duplicateName = await collegeModel.findOne({ name: data.name,isDeleted:false})
         if (duplicateName) {
             return res.status(400).send({ status: false, message: "Please provide unique name" })
         }
@@ -28,7 +28,7 @@ const createCollege = async function (req, res) {
         if (!validator.isValid(data.fullName)) {
             return res.status(400).send({ status: false, message: "fullName can contain only letters,space,comma,'&',and '-' " })
         }
-      //   let duplicateFullName = await collegeModel.findOne({ fullName: fullName })
+      //   let duplicateFullName = await collegeModel.findOne({ fullName: fullName,isDeleted:false})
       //  if (duplicateFullName ) {
       //  return res.status(400).send({ status: false, msg: "FullName  already exist" })
       //   }
@@ -39,7 +39,7 @@ const createCollege = async function (req, res) {
       //  if(!validator.isValidLink(data.logoLink)) {
       //    return res.status(400).send({ status: false, message: "LogoLink is Invalid" })
       //   }
-    //     let duplicatelink= await collegeModel.findOne({logoLink:logoLink})
+    //     let duplicatelink= await collegeModel.findOne({logoLink:logoLink,isDeleted:false})
     //     if (duplicatelink){
     //   return res.status(400).send({ status: false, msg: "logolink  already exist" })
     // }
@@ -56,12 +56,13 @@ const createCollege = async function (req, res) {
   const getcollege= async function(req, res){
     try{
       let collegeName = req.query.collegeName;
-      if (collegeName.length ===0) {
-        return res.status(400).send({ status: false, message: "Please provide collegeName of the college" })}
-
-      let college = await collegeModel.findOne({name:collegeName.toLowerCase()}).select({name:1,fullName:1,logoLink:1});
+      if(!collegeName) {
+        return res.status(400).send({ status: false, message: "Please provide query" })
+      }
+     
+      let college = await collegeModel.findOne({name:collegeName.toLowerCase(),isDeleted:false}).select({name:1,fullName:1,logoLink:1});
       if(!college)return res.status(400).send({ status: false, msg:"college not found" });
-      let internName = await internModel.find({collegeId:college._id}).select({name:1,email:1,mobile:1,_id:1});
+      let internName = await internModel.find({collegeId:college._id,isDeleted:false}).select({name:1,email:1,mobile:1,_id:1});
       if (internName.length===0)return res.status(404).send({status:false,message:"there is no students is applied for internship"})
       let allInterns ={
         name: college.name,
